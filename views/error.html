@@ -1,0 +1,92 @@
+<!-- /*********************************************************************************
+* WEB322 – Assignment 03
+* I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
+* of this assignment has been copied manually or electronically from any other source
+* (including 3rd party web sites) or distributed to other students.
+*
+* Name: Tanishq Talreja Student ID: 126460203 Date:17-02-22
+*
+* Online (Heroku) Link:https://arcane-brushlands-95060.herokuapp.com/ | https://git.heroku.com/arcane-brushlands-95060.git
+*cite: https://www.flickr.com/photos/filicudi/2891898817 :for picture of error 404
+********************************************************************************/   -->
+<!-- https://www.flickr.com/photos/filicudi/2891898817 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+ <title>error 404</title>
+<style>
+#root{
+    margin: 0px;
+    padding: 0px;
+
+}
+body{
+    background-color: bisque;
+}
+
+.error{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+ 
+}
+
+.error img{
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 80px;
+}
+
+.cont{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.cont button{
+
+    border-radius: 40px;
+    color: black;
+    background-color: aliceblue;
+    font-size: large;
+    text-align: center;
+}
+
+#qt{
+    display: flex;
+    flex-direction: column;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: larger;
+    
+
+}
+</style>
+
+</head>
+
+<div class="error">
+    <img src="./2891898817_71620104ff_z.jpg" alt="error404">
+    <div class="cont">
+        <button class="begin" onclick="newQuote()">CLICK ME FOR SECRET!!!!!!</button>
+        <div class="qoute">
+            <p id="qt"></p>
+        </div>
+        
+    </div>
+</div>
+<script>
+    function newQuote(){
+    var qoute=['404s and heartbreaks are saddest thing in life',
+'Am i a bad programmer or are u a curious tech guy???',
+'SIMON GO BACKKKK!!!!!! ',
+'CAUGHT RED HANDED',
+'BEYOND THE BORDERSSS',
+'NO SIGNAL FOR LIFE!!!!!']
+
+    var rnum=Math.floor(Math.random()*(qoute.length));
+    document.getElementById('qt').innerHTML=qoute[rnum];
+}
+</script>
+
+</html>
