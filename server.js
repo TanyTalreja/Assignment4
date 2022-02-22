@@ -28,7 +28,7 @@ app.use(express.static(__dirname + '/public/css'));
 //A4
 app.use(bodyParser.urlencoded({extended : true}));
 
-
+//ass5
 app.use(function(req,res,next){     
     let route = req.baseUrl + req.path;     
     app.locals.activeRoute = (route == "/") ? "/" : route.replace(/\/$/, "");     
@@ -39,7 +39,8 @@ app.engine('.hbs', exphbs({
     extname: ".hbs",
     defaultLayout: "main",
     helpers:{
-        navLink: function(url, options){     return '<li' +          
+        navLink: function(url, options){    
+             return '<li' +          
             ((url == app.locals.activeRoute) ? ' class="active" ' : '') +  
             '><a href="' + url + '">' + options.fn(this) + '</a></li>'; } ,
         

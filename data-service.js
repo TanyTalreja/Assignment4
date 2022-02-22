@@ -149,3 +149,15 @@ module.exports.getEmployeeByNum = function(num){
             resolve(empl);
     });
 }
+
+//ass5
+module.exports.updateEmployee= function(employeeData){
+
+    return new Promise((resolve, reject)=>{
+        for(var i=0; i<employees.length; i++){
+            if(employees[i].employeeNum == employeeData.employeeNum)
+                employees[i] = employeeData;
+        }
+       
+    });
+}
