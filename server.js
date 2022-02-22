@@ -67,7 +67,7 @@ app.engine('.hbs', exphbs({
 app.set("view engine", ".hbs");
 
 
-// cinitializing and starting the server if no error found
+
 
 
 // setup a 'route' 
