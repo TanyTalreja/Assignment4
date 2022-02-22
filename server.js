@@ -24,6 +24,15 @@ const exphbs= require('express-handlebars');
 
 var HTTP_PORT = process.env.PORT || 8080;
 
+datasrvc.initialize().then(() => {
+    app.listen(HTTP_PORT, ()=>{
+        console.log("Express http server started and listening on: ", HTTP_PORT);
+    });
+}).catch((err) => {
+    console.log("IRRRORRRRR!!!!! ", err);
+}) 
+
+
 app.use(express.static(__dirname + '/public/css'));
 //A4
 app.use(bodyParser.urlencoded({extended : true}));
@@ -59,13 +68,6 @@ app.set("view engine", ".hbs");
 
 
 // cinitializing and starting the server if no error found
-datasrvc.initialize().then(() => {
-    app.listen(HTTP_PORT, ()=>{
-        console.log("Express http server started and listening on: ", HTTP_PORT);
-    });
-}).catch((err) => {
-    console.log("IRRRORRRRR!!!!! ", err);
-}) 
 
 
 // setup a 'route' 
@@ -119,7 +121,8 @@ app.get("/employees", function(req, res){
         else if(req.query.manager){
             datasrvc.getEmployeesByManager(req.query.manager).then(data=>{
                 res.render("employees", {employees: data});
-            }).catch(err=>{ res.render("employees", {message: "no results"});
+            }).catch(err=>{ 
+                res.render("employees", {message: "no results"});
         });
 
         }
@@ -140,7 +143,7 @@ app.get('/employee/:value', (req, res)=>{
         res.render("employee", {employee: data }); 
     })
     .catch((err)=>{ 
-        res.render("employee", {message: err});}); 
+        res.render("employees", {message: "no results"});}); 
 
 });
 
@@ -150,13 +153,12 @@ app.get('/employee/:value', (req, res)=>{
 app.get("/departments", function(req,res){
     datasrvc.getDepartments()
                     .then((data)=>{
-                        console.log("parsed department");
                         res.render("departments", { departments: data });
 
                     })
                     .catch((error)=>{
                         
-                        res.render({message: err});
+                        res.render("departments", {message: "no results"});
                     })
 });
 

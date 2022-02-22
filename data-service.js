@@ -6,7 +6,7 @@ var departments=[];
 //initializing the json files data
 module.exports.initialize = function () {
 
-    var promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
        
         try {
 
@@ -37,51 +37,44 @@ module.exports.initialize = function () {
 //employees
 
 module.exports.getAllEmployees = function(){
-
-    var promise=new Promise((resolve,reject)=>
-    {
-        if(employees.length==0)
-        {
-            var error="no results returned";
-            reject({message:error});
+    var employ =[];
+    return new Promise((resolve, reject)=>{
+        for(var i=0; i<employees.length; i++){
+            employ.push(employees[i]);
         }
-        resolve(employees);
-    })
-    return promise;
+        if(employ.length ==0)
+            reject("No result");
+        resolve(employ);
+    });
 
 };
 
 //departments
 module.exports.getDepartments=function(){
-    var promise=new Promise((resolve,reject)=>{
-        if(departments.length==0)
-        {
-            var error="no data for department";
-            reject({message:error});
+    return new Promise(function(resolve, reject){
+        if(departments.length ==0){
+            reject('No results returned!')
+        }else{
+            resolve(departments);
         }
-        resolve(departments);
-    })
-    return promise;
+     });
 
 };
 
 //managers
 module.exports.getManagers=function(){
-var mng=[];
-var promise=new Promise((resolve,reject)=>{
-    for (let i = 0; i < employees.length; i++) {
-        if(employees[i].isManager==true){
-            mng[i]=employees[i];
-        }        
-        
-    }
-    if(mng.length===0){
-        var error ="no data for managers";
-        reject({message:error});
-    }
-    resolve(mng);
-})
-return promise;
+    var mngrs =[];
+    return new Promise(function(resolve, reject){
+        for(var i=0; i<employees.length; i++){
+           if(employees[i].isManager ==true){
+            mngrs.push(employees[i]);
+           }
+                
+        }
+        if(mngrs.length ==0)
+            reject("No result returned");
+        resolve(mngrs);
+    });
 };
 
 //A4
