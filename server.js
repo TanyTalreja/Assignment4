@@ -46,7 +46,7 @@ app.engine('.hbs', exphbs({
         
             equal:(lvalue, rvalue, options)=>{
             if(arguments.length <3)
-                throw new Error("Handlebars Helper equal needs 2 parameters");
+                throw new Error("Handlebars Helper");
             if (lvalue != rvalue){
                 return options.inverse(this);
             }else{
@@ -87,7 +87,7 @@ app.get("/images/add", function(req,res){
 
 
 // setup another route to listen on /about
-app.get("/about", function(req,res){
+app.get("/about", function(req, res){
     res.render("about");
 });
 
@@ -200,7 +200,7 @@ app.get("/images",  function(req, res){
       
     fs.readdir("./public/images/uploaded", function(err, items){
        
-        res.json( {"images": items});
+        res.render("images", {data:items});
    });
    
    
