@@ -18,11 +18,44 @@ const fs = require('fs');
 var path = require("path");
 
 
+const exphbs= require('express-handlebars');
+
+
+
 var HTTP_PORT = process.env.PORT || 8080;
 
 app.use(express.static(__dirname + '/public/css'));
 //A4
 app.use(bodyParser.urlencoded({extended : true}));
+
+
+app.use(function(req,res,next){     
+    let route = req.baseUrl + req.path;     
+    app.locals.activeRoute = (route == "/") ? "/" : route.replace(/\/$/, "");     
+    next(); 
+}); 
+ 
+app.engine('.hbs', exphbs({ 
+    extname: ".hbs",
+    defaultLayout: "main",
+    helpers:{
+        navLink: function(url, options){     return '<li' +          
+            ((url == app.locals.activeRoute) ? ' class="active" ' : '') +  
+            '><a href="' + url + '">' + options.fn(this) + '</a></li>'; } ,
+        
+            equal:(lvalue, rvalue, options)=>{
+            if(arguments.length <3)
+                throw new Error("Handlebars Helper equal needs 2 parameters");
+            if (lvalue != rvalue){
+                return options.inverse(this);
+            }else{
+                return options.fn(this);
+            }
+        }
+    }
+}));
+app.set("view engine", ".hbs");
+
 
 // cinitializing and starting the server if no error found
 datasrvc.initialize().then(() => {
@@ -37,24 +70,24 @@ datasrvc.initialize().then(() => {
 // setup a 'route' 
 
 app.get("/", function(req,res){
-    res.sendFile(path.join(__dirname,"/views/home.html"));
+    res.render("home");
 });
 
 //route for employees/add
 app.get("/employees/add", function(req,res){
-    res.sendFile(path.join(__dirname,"/views/addEmployee.html"));
+    res.render("addEmployee");
 });
 
 
 //route for images/add
 app.get("/images/add", function(req,res){
-    res.sendFile(path.join(__dirname,"/views/addImage.html"));
+    res.render("addImage");
 });
 
 
 // setup another route to listen on /about
 app.get("/about", function(req,res){
-    res.sendFile(path.join(__dirname,"/views/about.html"));
+    res.render("about");
 });
 
 
@@ -64,34 +97,35 @@ app.get("/employees", function(req, res){
 
     if(req.query.status ){
         datasrvc.getEmployeesByStatus(req.query.status).then((data)=>{
-            res.json(data);
+            res.render("employees", {employees: data});
            
         }).catch(function(err){
-                res.json({message: err});
+            res.render({message: err});
             })
     }
     
     
     else if(req.query.department){
         datasrvc.getEmployeesByDepartment(req.query.department).then(data=>{
-            res.json(data);
+            res.render("employees", {employees: data});
         }).catch(err=>{
-            res.json({message: err});
+            res.render({message: err});
         }) }
         
         
         
         else if(req.query.manager){
             datasrvc.getEmployeesByManager(req.query.manager).then(data=>{
-                res.json(data);
-            }).catch(err=>{ res.json({message: err})});
+                res.render("employees", {employees: data});
+            }).catch(err=>{ res.render({message: err});
+        });
 
         }
         else {
             datasrvc.getAllEmployees().then(data=>{
-                res.json(data);
+                res.render("employees",  {employees:data});
             }).catch(
-                err=>{ res.json({message: err})}
+                err=>{ res.render({message: err});}
             );
     }
 
@@ -99,10 +133,12 @@ app.get("/employees", function(req, res){
 });
 
 app.get('/employee/:value', (req, res)=>{
-    datasrvc.getEmployeeByNum(req.params.value).then(data=>{
-        res.json(data);
-    }).catch((err)=>{ 
-        res.json( {err})});
+    datasrvc.getEmployeeByNum(req.params.value).then(data=>
+        {
+        res.render("employee", {employee: data }); 
+    })
+    .catch((err)=>{ 
+        res.render("employee", {message: err});}); 
 
 });
 
@@ -113,12 +149,12 @@ app.get("/departments", function(req,res){
     datasrvc.getDepartments()
                     .then((data)=>{
                         console.log("parsed department");
-                        res.json(data);
+                        res.render("departments", { departments: data });
 
                     })
                     .catch((error)=>{
                         
-                        res.json(error);
+                        res.render({message: err});
                     })
 });
 
@@ -141,6 +177,7 @@ app.get("/managers", function(req,res){
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname,"/views/error.html"));
   });
+
 
 //A$444
 const storage = multer.diskStorage({
@@ -181,5 +218,11 @@ app.post("/employees/add", function(req, res){
 
 });
 
-
+app.post("/employee/update", function(req, res){
+    console.log(req.body);
+    dataService.updateEmployee(req.body).then(
+        ()=>res.redirect('/employees')
+    );
+       
+});
 
