@@ -9,32 +9,26 @@
 * Online (Heroku) Link:https://arcane-brushlands-95060.herokuapp.com/ | https://git.heroku.com/arcane-brushlands-95060.git
 *cite: https://www.flickr.com/photos/filicudi/2891898817 :for picture of error 404
 ********************************************************************************/   
-const express = require("express");
+var express = require("express");
+var datasrvc=require("./data-service.js");
+var app = express();
 const multer = require("multer");
 const bodyParser = require("body-parser");
-const path= require("path");
-const dataService = require("./data-service.js");
 const fs = require('fs');
+var path = require("path");
+
+
 const exphbs= require('express-handlebars');
-const HTTP_PORT = process.env.PORT || 8080;
-const app = express();
 
 
-function onHttpStart() {
 
-    console.log("Express http server listening on "+ HTTP_PORT);
-  
-    return new Promise(function(reslove, reject){
-        dataService.initialize().then(function(value){
-            console.log(value);
-        }).catch(function(reason){
-                console.log(reason);
-            }); 
-    });
-}
+var HTTP_PORT = process.env.PORT || 8080;
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public/css'));
+//A4
 app.use(bodyParser.urlencoded({extended : true}));
+
+//ass5
 app.use(function(req,res,next){     
     let route = req.baseUrl + req.path;     
     app.locals.activeRoute = (route == "/") ? "/" : route.replace(/\/$/, "");     
@@ -45,13 +39,14 @@ app.engine('.hbs', exphbs({
     extname: ".hbs",
     defaultLayout: "main",
     helpers:{
-        navLink: function(url, options){     return '<li' +          
+        navLink: function(url, options){    
+             return '<li' +          
             ((url == app.locals.activeRoute) ? ' class="active" ' : '') +  
             '><a href="' + url + '">' + options.fn(this) + '</a></li>'; } ,
         
             equal:(lvalue, rvalue, options)=>{
             if(arguments.length <3)
-                throw new Error("Handlebars Helper equal needs 2 parameters");
+                throw new Error("Handlebars Helper");
             if (lvalue != rvalue){
                 return options.inverse(this);
             }else{
@@ -63,118 +58,162 @@ app.engine('.hbs', exphbs({
 app.set("view engine", ".hbs");
 
 
-app.get("/", function(req, res){
+// cinitializing and starting the server if no error found
+datasrvc.initialize().then(() => {
+    app.listen(HTTP_PORT, ()=>{
+        console.log("Express http server started and listening on: ", HTTP_PORT);
+    });
+}).catch((err) => {
+    console.log("IRRRORRRRR!!!!! ", err);
+}) 
+
+
+// setup a 'route' 
+
+app.get("/", function(req,res){
     res.render("home");
 });
 
+//route for employees/add
+app.get("/employees/add", function(req,res){
+    res.render("addEmployee");
+});
+
+
+//route for images/add
+app.get("/images/add", function(req,res){
+    res.render("addImage");
+});
+
+
+// setup another route to listen on /about
 app.get("/about", function(req, res){
     res.render("about");
 });
 
 
+//employee
 app.get("/employees", function(req, res){
 
 
     if(req.query.status ){
-        dataService.getEmployeesByStatus(req.query.status).then((data)=>{
-           
-            res.render("employees", {employees: data});
-           // res.render("employees", { data: data, title: "Employees" });
-        }).catch(function(err){
-                res.render({message: err});
-            })
-    }else if(req.query.department){
-        dataService.getEmployeesByDepartment(req.query.department).then(data=>{
-            res.render("employees", {employees: data});
+        datasrvc.getEmployeesByStatus(req.query.status).then((data)=>{
             
+            res.render("employees", {employees: data});
+           
+        }).catch(function(err){
+            res.render("employees", {message: "no results"});
+            })
+    }
+    
+    
+    else if(req.query.department){
+        datasrvc.getEmployeesByDepartment(req.query.department).then(data=>{
+            res.render("employees", {employees: data});
         }).catch(err=>{
-            res.render({message: err});
-        }) }else if(req.query.manager){
-            dataService.getEmployeesByManager(req.query.manager).then(data=>{
+            res.render("employees", {message: "no results"});
+        }) }
+        
+        
+        
+        else if(req.query.manager){
+            datasrvc.getEmployeesByManager(req.query.manager).then(data=>{
                 res.render("employees", {employees: data});
-            }).catch(err=>{ res.render({message: err})});
+            }).catch(err=>{ res.render("employees", {message: "no results"});
+        });
 
-        }else {
-            dataService.getAllEmployees().then(data=>{              
+        }
+        else {
+            datasrvc.getAllEmployees().then(data=>{
                 res.render("employees",  {employees:data});
-            }).catch(              
-                err=>{res.render({message: err})}            
+            }).catch(
+                err=>{ res.render("employees", {message: "no results"});}
             );
-    } 
+    }
+
+ 
 });
 
 app.get('/employee/:value', (req, res)=>{
-    dataService.getEmployeeByNum(req.params.value).then(data=>{
+    datasrvc.getEmployeeByNum(req.params.value).then(data=>
+        {
         res.render("employee", {employee: data }); 
-    }).catch(
-        (err)=>{
-        res.render("employee", {message: err});   
-    });
+    })
+    .catch((err)=>{ 
+        res.render("employee", {message: err});}); 
+
 });
 
 
-app.get("/managers", function(req,res){
-   
-   dataService.getManagers().then(function(data){
-        res.json(data);
-   }).catch(function(err){
-       res.json({message: err});
-   });
- 
- });
-
+//department
 
 app.get("/departments", function(req,res){
-    
-    dataService.getDepartments().then(function(data){
-       
-        res.render("departments", { departments: data });
-    }).catch(function(err){
-        res.render({message: err});
-    });
- 
-   
+    datasrvc.getDepartments()
+                    .then((data)=>{
+                        console.log("parsed department");
+                        res.render("departments", { departments: data });
+
+                    })
+                    .catch((error)=>{
+                        
+                        res.render({message: err});
+                    })
 });
 
-app.get("/employees/add", function(req,res){
-    res.render("addEmployee");
+
+//manager
+app.get("/managers", function(req,res){
+    datasrvc.getManagers()
+                    .then((data)=>{
+                        console.log("parsed managers");
+                        res.json(data);
+
+                    })
+                    .catch((error)=>{
+                        
+                        res.json(error);
+                    })
 });
 
-app.get("/images/add", function(req, res){
-    res.render("addImage");
-               
-});
+//error handling
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname,"/views/error.html"));
+  });
 
+
+//A$444
 const storage = multer.diskStorage({
     destination: "./public/images/uploaded",
     filename: function(req, file, cb){
         cb(null, Date.now()+path.extname(file.originalname));
     }
 });
-const upload = multer({storage:storage});
+
+const upload = multer({ storage: storage });
+
 
 app.post("/images/add", upload.single("imageFile"), function(req, res){
     res.redirect('/images');
 } );
 
 
- app.get("/images",  function(req, res){  
-      
-     fs.readdir("./public/images/uploaded", function(err, items){      
-         res.render("images", {data:items});
-    });
-
- });
-
- 
-app.post("/employees/add", function(req, res){
-    dataService.addEmployees(req.body).then(
-        res.redirect('/employees')
- 
-    )
-     .catch(function(err){
-        res.json({message: err});
+app.get("/images",  function(req, res){   
+    fs.readdir("./public/images/uploaded", function(err, items){
+        res.render("images", {data:items});
    });
+   
+   
+});
+
+
+app.post("/employees/add", function(req, res){
+    datasrvc.addEmployees(req.body).then(
+       res.redirect('/employees')
+       
+   )
+    .catch(function(err){
+       res.json({message: err});
+  });
 
 
 });
@@ -187,11 +226,3 @@ app.post("/employee/update", function(req, res){
        
 });
 
-
-
-
-app.use(function(req, res){
-    res.status(404).send("PAGE NOT FOUND!!!!!!!!!!!");
-});
-
-app.listen(HTTP_PORT, onHttpStart);
