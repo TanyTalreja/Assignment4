@@ -101,7 +101,7 @@ app.get("/employees", function(req, res){
             res.render("employees", {employees: data});
            
         }).catch(function(err){
-            res.render({message: err});
+            res.render("employees", {message: "no results"});
             })
     }
     
@@ -110,7 +110,7 @@ app.get("/employees", function(req, res){
         datasrvc.getEmployeesByDepartment(req.query.department).then(data=>{
             res.render("employees", {employees: data});
         }).catch(err=>{
-            res.render({message: err});
+            res.render("employees", {message: "no results"});
         }) }
         
         
@@ -118,7 +118,7 @@ app.get("/employees", function(req, res){
         else if(req.query.manager){
             datasrvc.getEmployeesByManager(req.query.manager).then(data=>{
                 res.render("employees", {employees: data});
-            }).catch(err=>{ res.render({message: err});
+            }).catch(err=>{ res.render("employees", {message: "no results"});
         });
 
         }
@@ -126,7 +126,7 @@ app.get("/employees", function(req, res){
             datasrvc.getAllEmployees().then(data=>{
                 res.render("employees",  {employees:data});
             }).catch(
-                err=>{ res.render({message: err});}
+                err=>{ res.render("employees", {message: "no results"});}
             );
     }
 
